@@ -19,6 +19,7 @@ import java.net.URL;
 
 /**
  * todo:兼容android 7.0 --->  xml 配置， Uri.fromFile 测试
+ * 有时间需要做
  */
 public class ApkDownloadTask extends AsyncTask<String, Integer, Boolean>
 {
