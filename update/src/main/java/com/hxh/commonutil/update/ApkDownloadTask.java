@@ -2,9 +2,11 @@ package com.hxh.commonutil.update;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -16,6 +18,8 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import androidx.core.content.FileProvider;
 
 /**
  * todo:兼容android 7.0 --->  xml 配置， Uri.fromFile 测试
@@ -101,19 +105,24 @@ public class ApkDownloadTask extends AsyncTask<String, Integer, Boolean>
     protected void onPostExecute(Boolean s) {
         super.onPostExecute(s);
         progressDialog.dismiss();
+        Activity activity = activityRef.get();
+        if(activity == null)
+        {
+            return;
+        }
         if(s)
         {
-            install();
+            install(activity);
         }else
         {
-            Toast.makeText(activityRef.get(), "新版本app下载失败，请重试", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "新版本app下载失败，请重试", Toast.LENGTH_SHORT).show();
         }
     }
 
     /**
      * 跳到系统安装应用界面（新大陆开发调试样机跳不到安装界面，在正式机上是正常的）
      */
-    private void install() {
+    private void install(Context context) {
         File apkfile = new File(Environment.getExternalStorageDirectory()+"/" + DOWNLOAD_DIR +"parkpatrol_" + BuildConfig.FLAVOR + ".apk");
         if (!apkfile.exists()) {
             Toast.makeText(activityRef.get(), "安装包文件不存在", Toast.LENGTH_SHORT).show();
@@ -124,7 +133,16 @@ public class ApkDownloadTask extends AsyncTask<String, Integer, Boolean>
         i.setAction(Intent.ACTION_VIEW);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        i.setDataAndType(Uri.fromFile(apkfile), "application/vnd.android.package-archive");
+        Uri uri = null;
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        {
+            uri = Uri.fromFile(apkfile);
+        }else
+        {
+            String name = context.getPackageName() + ".provider";
+            uri = FileProvider.getUriForFile(context, name, apkfile);
+        }
+        i.setDataAndType(uri, "application/vnd.android.package-archive");
         activityRef.get().startActivity(i);
     }
 }
