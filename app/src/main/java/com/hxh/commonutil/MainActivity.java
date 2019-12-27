@@ -1,26 +1,40 @@
 package com.hxh.commonutil;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 import android.os.Bundle;
+import android.view.View;
 
-import com.hxh.logutil.FileLog;
-import com.hxh.logutil.LogUtil;
+import com.hxh.commonutil.databinding.ActivityTestFormBinding;
+import com.hxh.formvalidator.FormValidatorManager;
+import com.hxh.formvalidator.fields.PasswordEqualValidator;
+import com.hxh.formvalidator.fields.PasswordValidator;
+import com.hxh.formvalidator.fields.PhoneValidator;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        ActivityTestFormBinding bind = DataBindingUtil.setContentView(this, R.layout.activity_test_form);
 
-//        FileLog.deleteBeforeFile(this, 1);
-    }
+        final FormValidatorManager manager = new FormValidatorManager();
+        manager.bindButton(bind.btn);
+        manager.add(new PhoneValidator(bind.etPhone));
+        manager.add(new PasswordValidator(bind.etPassowrd));
+        manager.add(new PasswordValidator(bind.etPassowrdSure));
+        manager.add(new PasswordEqualValidator(bind.etPassowrd, bind.etPassowrdSure));
+        manager.execute();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        LogUtil.getInstance(this).logfile("test", "aaaaaaaaaaaaaaaaaa");
-//        LogUtil.getInstance(this).logfile("aaaaaaaaaaaaaaaaaa");
+        bind.btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!manager.isValid())
+                {
+                    return;
+                }
+            }
+        });
     }
 }

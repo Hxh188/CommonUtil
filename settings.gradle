@@ -1,2 +1,2 @@
-include ':app', ':update', ':update_by_system', ':logutil'
+include ':app', ':update', ':update_by_system', ':logutil', ':formvalidator'
 rootProject.name='CommonUtil'
