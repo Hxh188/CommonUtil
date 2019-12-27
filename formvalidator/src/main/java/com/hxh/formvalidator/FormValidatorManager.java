@@ -11,22 +11,6 @@ public class FormValidatorManager implements TextWatcher {
     private ArrayList<EditValidator> etValidators = new ArrayList<>();
     private TextView button;
 
-    public FormValidatorManager add(EditValidator ev) {
-        etValidators.add(ev);
-        TextView tv = ev.getEt();
-        if(tv != null)
-        {
-            ev.getEt().addTextChangedListener(this);
-        }
-        return this;
-    }
-
-    public FormValidatorManager bindButton(TextView button)
-    {
-        this.button = button;
-        return this;
-    }
-
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -35,6 +19,18 @@ public class FormValidatorManager implements TextWatcher {
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
 
+    }
+
+    public void setListener()
+    {
+        for(EditValidator ev:etValidators)
+        {
+            TextView tv = ev.getEt();
+            if(tv != null)
+            {
+                ev.getEt().addTextChangedListener(this);
+            }
+        }
     }
 
     @Override
@@ -70,5 +66,33 @@ public class FormValidatorManager implements TextWatcher {
             }
         }
         return isValid;
+    }
+
+    public static class Builder
+    {
+        private ArrayList<EditValidator> etValidators = new ArrayList<>();
+        private TextView button;
+
+        public Builder add(EditValidator validator)
+        {
+            etValidators.add(validator);
+            return this;
+        }
+
+        public Builder button(TextView button)
+        {
+            this.button = button;
+            return this;
+        }
+
+        public FormValidatorManager build()
+        {
+            FormValidatorManager manager = new FormValidatorManager();
+            manager.button = button;
+            manager.etValidators = etValidators;
+            manager.setListener();
+            manager.execute();
+            return manager;
+        }
     }
 }
